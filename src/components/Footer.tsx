@@ -76,6 +76,9 @@ const Footer = () => {
           <p className="text-secondary-foreground/40 text-sm">
             © {new Date().getFullYear()} Vedha Restaurant. All rights reserved.
           </p>
+          <p className="text-secondary-foreground/40 text-xs mt-2">
+            Developed by Marketing Spaces, a Tech Mecha Torque enterprise
+          </p>
         </div>
       </div>
     </footer>
