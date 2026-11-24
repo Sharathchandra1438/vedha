@@ -1,690 +1,73 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { forwardRef, useMemo, useState } from "react";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import { Search, X } from "lucide-react";
 import PageHero from "@/components/PageHero";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-type TopCategory =
-  | "soups"
-  | "starters"
-  | "noodles"
-  | "curries"
-  | "tandoori"
-  | "rice"
-  | "biryani"
-  | "breads"
-  | "salads"
-  | "desserts"
-  | "beverages";
-
-type SubCategory = string;
-
-interface MenuItem {
-  name: string;
-  desc?: string;
-  price: string;
-  price2?: string;
-  price3?: string;
-  priceLabel2?: string;
-  priceLabel3?: string;
-}
-
-interface MenuSection {
-  sub: SubCategory;
-  items: MenuItem[];
-}
-
-// ─── Menu Data ───────────────────────────────────────────────────────────────
-const menuData: Record<TopCategory, MenuSection[]> = {
-  soups: [
-    {
-      sub: "Veg",
-      items: [
-        { name: "Cream Tomato Soup", price: "₹119" },
-        { name: "Cream Palak Soup", price: "₹119" },
-        { name: "French Onion Soup", price: "₹119" },
-        { name: "Manchow Soup", price: "₹119" },
-        { name: "Hot & Sour Soup", price: "₹119" },
-        { name: "Sweet Corn Soup", price: "₹119" },
-        { name: "Schezwan Soup", price: "₹119" },
-        { name: "Mushroom Soup", price: "₹119" },
-        { name: "Vedha's Spl Veg Soup", price: "₹129" },
-      ],
-    },
-    {
-      sub: "Non Veg",
-      items: [
-        { name: "Sweet Corn Chicken Soup", price: "₹139" },
-        { name: "Chicken Hot & Sour Soup", price: "₹139" },
-        { name: "Chicken Schezwan Soup", price: "₹139" },
-        { name: "Chicken Garlic Soup", price: "₹139" },
-        { name: "Chicken Manchow Soup", price: "₹139" },
-        { name: "Chicken Clear Soup", price: "₹139" },
-        { name: "Chicken Lemon Soup", price: "₹139" },
-        { name: "Mutton Hot & Sour Soup", price: "₹149" },
-        { name: "Mutton Schezwan Soup", price: "₹149" },
-        { name: "Vedha's Spl Non-Veg Soup", price: "₹159" },
-      ],
-    },
-  ],
-
-  starters: [
-    {
-      sub: "Veg",
-      items: [
-        { name: "Paneer Pakoda", price: "₹229" },
-        { name: "Paneer Manchurian", price: "₹239" },
-        { name: "Paneer Swasthik", price: "₹249" },
-        { name: "Paneer Chilli", price: "₹249" },
-        { name: "Paneer Majestic", price: "₹259" },
-        { name: "Paneer 65", price: "₹259" },
-        { name: "Crispy Paneer", price: "₹259" },
-        { name: "Mushroom Manchurian", price: "₹259" },
-        { name: "Mushroom Chilli", price: "₹259" },
-        { name: "Veg Banjara", price: "₹259" },
-        { name: "Golden Veg", price: "₹259" },
-        { name: "Baby Corn Banjara", price: "₹259" },
-        { name: "Gobi Chilli", price: "₹269" },
-        { name: "Gobi 65", price: "₹269" },
-        { name: "Gobi Manchurian", price: "₹269" },
-        { name: "Aloo 65", price: "₹189" },
-        { name: "Crispy Corn", price: "₹189" },
-        { name: "Chilli Baby Corn", price: "₹229" },
-        { name: "French Fries", price: "₹189" },
-        { name: "Veg Manchurian", price: "₹249" },
-      ],
-    },
-    {
-      sub: "Veg Wet",
-      items: [
-        { name: "Veg Manchurian Wet", price: "₹239" },
-        { name: "Veg Chilli Wet", price: "₹239" },
-        { name: "Chinese Veg Wet", price: "₹239" },
-        { name: "Chilli Paneer Wet", price: "₹249" },
-        { name: "Ginger Paneer Wet", price: "₹249" },
-        { name: "Ginger Gobi Wet", price: "₹239" },
-        { name: "Chilli Mushroom Wet", price: "₹249" },
-      ],
-    },
-    {
-      sub: "Chicken",
-      items: [
-        { name: "Chicken Chilli", price: "₹329" },
-        { name: "Chicken Manchurian", price: "₹329" },
-        { name: "Chicken 65", price: "₹329" },
-        { name: "Chicken Golden Fry", price: "₹329" },
-        { name: "Chicken Goa", price: "₹329" },
-        { name: "Chicken Mejistic", price: "₹329" },
-        { name: "Chicken Lollipop 6p", price: "₹329" },
-        { name: "Chicken Ginger Dry", price: "₹329" },
-        { name: "Chicken Drumsticks 6p", price: "₹329" },
-        { name: "Chicken Dragon", price: "₹329" },
-        { name: "Chicken Nasik Dry", price: "₹349" },
-        { name: "Chicken 100 (With bone)", price: "₹349" },
-        { name: "Chicken 555", price: "₹349" },
-        { name: "Pudina Chicken", price: "₹349" },
-        { name: "Chicken Kaju Nut", price: "₹349" },
-        { name: "Chicken Wings Crispy 6p", price: "₹349" },
-        { name: "Chicken Roast", price: "₹349" },
-        { name: "Pepper Chicken", price: "₹349" },
-        { name: "Chicken Hot Garlic Dry", price: "₹349" },
-        { name: "Schezwan Chicken Dry", price: "₹349" },
-        { name: "Chicken Bhurani", price: "₹349" },
-        { name: "Vedha's Spl Chicken Dry", price: "₹369" },
-      ],
-    },
-    {
-      sub: "Chicken Wet",
-      items: [
-        { name: "Chicken Chilli Wet", price: "₹319" },
-        { name: "Chicken Manchurian Wet", price: "₹319" },
-        { name: "Chicken Ginger Wet", price: "₹319" },
-      ],
-    },
-    {
-      sub: "Egg",
-      items: [
-        { name: "Egg Ellora", price: "₹229" },
-        { name: "Egg Manchurian", price: "₹229" },
-        { name: "Egg 65", price: "₹229" },
-        { name: "Egg Chilli", price: "₹239" },
-        { name: "Egg Pepper Garlic Fry", price: "₹239" },
-        { name: "Egg Nasik Dry", price: "₹239" },
-        { name: "Egg Hot Garlic Dry", price: "₹239" },
-        { name: "Vedha's Spl Egg Dry", price: "₹249" },
-      ],
-    },
-    {
-      sub: "Mutton",
-      items: [
-        { name: "Mutton Chilli", price: "₹399" },
-        { name: "Mutton Manchurian", price: "₹399" },
-        { name: "Mutton 65", price: "₹399" },
-        { name: "Mutton Korea", price: "₹399" },
-        { name: "Mutton Golden Fry", price: "₹409" },
-        { name: "Mutton Ginger Dry", price: "₹409" },
-        { name: "Vedha's Spl Mutton Dry", price: "₹419" },
-      ],
-    },
-    {
-      sub: "Mutton Wet",
-      items: [
-        { name: "Mutton Chilli Wet", price: "₹389" },
-        { name: "Mutton Ginger Wet", price: "₹399" },
-        { name: "Mutton Hot Garlic Wet", price: "₹399" },
-      ],
-    },
-    {
-      sub: "Fish",
-      items: [
-        { name: "Apollo Fish", price: "₹369" },
-        { name: "Fish Manchuria", price: "₹369" },
-        { name: "Fish Chilli", price: "₹369" },
-        { name: "Fish 65", price: "₹369" },
-        { name: "Fish Ginger Dry", price: "₹369" },
-        { name: "Fish Fingers", price: "₹369" },
-        { name: "Schezwan Fish Dry", price: "₹369" },
-        { name: "Vedha's Spl Fish Dry", price: "₹389" },
-      ],
-    },
-    {
-      sub: "Prawns",
-      items: [
-        { name: "Prawns Hot Garlic Dry", price: "₹369" },
-        { name: "Prawns Hariyali", price: "₹369" },
-        { name: "Prawns Manchurian", price: "₹369" },
-        { name: "Prawns Chilli", price: "₹369" },
-        { name: "Prawns 65", price: "₹369" },
-        { name: "Prawns Golden Dry", price: "₹369" },
-        { name: "Prawns Ellora", price: "₹369" },
-        { name: "Schezwan Prawns Dry", price: "₹369" },
-        { name: "Loose Prawns", price: "₹369" },
-        { name: "Vedha's Spl Prawns Dry", price: "₹389" },
-      ],
-    },
-    {
-      sub: "Fish / Prawns Wet",
-      items: [
-        { name: "Fish Manchurian Wet", price: "₹359" },
-        { name: "Chilli Fish Wet", price: "₹359" },
-        { name: "Fish Ginger Wet", price: "₹359" },
-        { name: "Prawns Manchurian Wet", price: "₹359" },
-        { name: "Prawns Chilli Wet", price: "₹359" },
-        { name: "Schezwan Prawns Wet", price: "₹359" },
-      ],
-    },
-  ],
-
-  noodles: [
-    {
-      sub: "Veg",
-      items: [
-        { name: "Veg Soft Noodles", price: "₹199" },
-        { name: "Veg Crispy Noodles", price: "₹199" },
-        { name: "Veg Kashmiri Noodles", price: "₹209" },
-        { name: "Veg Singapoor Noodles", price: "₹209" },
-        { name: "Veg Chow Min Wet Noodles", price: "₹209" },
-        { name: "Vedha's Spl Wet Noodles", price: "₹219" },
-      ],
-    },
-    {
-      sub: "Non Veg",
-      items: [
-        { name: "Chicken Soft Noodles", price: "₹239" },
-        { name: "Mutton Soft Noodles", price: "₹259" },
-        { name: "Egg Soft Noodles", price: "₹219" },
-        { name: "Prawn Soft Noodles", price: "₹239" },
-        { name: "American Chopsuey Non Veg", price: "₹279" },
-        { name: "Vedha's SPL Non Veg Soft Noodles", price: "₹279" },
-      ],
-    },
-  ],
-
-  curries: [
-    {
-      sub: "Veg",
-      items: [
-        { name: "Navratan Korma", price: "₹289" },
-        { name: "Shahi Veg", price: "₹289" },
-        { name: "Maharani Veg", price: "₹289" },
-        { name: "Malaysia Veg", price: "₹289" },
-        { name: "Kolhapuri Veg", price: "₹289" },
-        { name: "Kadai Veg", price: "₹289" },
-        { name: "Telangana Veg Curry", price: "₹279" },
-        { name: "Jaipuri Veg", price: "₹289" },
-        { name: "Singapore Veg", price: "₹289" },
-        { name: "Mix Veg Curry", price: "₹279" },
-        { name: "Mutter Aloo", price: "₹279" },
-        { name: "Gobi Palak", price: "₹279" },
-        { name: "Methi Tomato", price: "₹279" },
-        { name: "Dhai Pakoda Curry", price: "₹289" },
-        { name: "Til Mirchi Masala", price: "₹289" },
-        { name: "Vedha's Spl Veg Curry", price: "₹309" },
-      ],
-    },
-    {
-      sub: "Paneer",
-      items: [
-        { name: "Kaju Paneer", price: "₹349" },
-        { name: "Methi Chaman", price: "₹339" },
-        { name: "Shahi Paneer", price: "₹339" },
-        { name: "Paneer Man Pasand", price: "₹339" },
-        { name: "Paneer Bhurji", price: "₹339" },
-        { name: "Palak Paneer", price: "₹329" },
-        { name: "Kadai Paneer", price: "₹339" },
-        { name: "Kaju Kadai", price: "₹349" },
-        { name: "Paneer Butter Masala", price: "₹329" },
-        { name: "Vedha's Spl Paneer", price: "₹359" },
-      ],
-    },
-    {
-      sub: "Mushroom",
-      items: [
-        { name: "Mushroom Palak", price: "₹269" },
-        { name: "Mushroom Butter Masala", price: "₹269" },
-        { name: "Kadai Mushroom", price: "₹269" },
-        { name: "Aloo Mushroom Masala", price: "₹269" },
-        { name: "Mushroom Tomato", price: "₹269" },
-        { name: "Vedha's Spl Mushroom Curry", price: "₹289" },
-      ],
-    },
-    {
-      sub: "Kofta",
-      items: [
-        { name: "Malai Kofta Curry", price: "₹289" },
-        { name: "Palak Kashmiri Kofta", price: "₹289" },
-        { name: "Paneer Kofta", price: "₹309" },
-        { name: "Veg Kofta Curry", price: "₹289" },
-        { name: "Vedha's Spl Veg Kofta", price: "₹319" },
-      ],
-    },
-    {
-      sub: "Chicken",
-      items: [
-        { name: "Butter Chicken", price: "₹369" },
-        { name: "Mughlai Chicken", price: "₹369" },
-        { name: "Kolhapuri Chicken", price: "₹359" },
-        { name: "Kadai Chicken", price: "₹359" },
-        { name: "Punjabi Chicken", price: "₹359" },
-        { name: "Malaysia Chicken", price: "₹359" },
-        { name: "Murg Mussalam", price: "₹379" },
-        { name: "Hyderabadi Chicken", price: "₹359" },
-        { name: "Maharaja Chicken", price: "₹359" },
-        { name: "Saghwala Chicken", price: "₹359" },
-        { name: "Chicken Masala", price: "₹359" },
-        { name: "Chicken Curry", price: "₹349" },
-        { name: "Chicken Fry", price: "₹359" },
-        { name: "Telangana Chicken", price: "₹359" },
-        { name: "Vedha's Spl Chicken Curry", price: "₹379" },
-      ],
-    },
-    {
-      sub: "Mutton",
-      items: [
-        { name: "Mutton Mughlai", price: "₹449" },
-        { name: "Mutton Kolhapuri", price: "₹449" },
-        { name: "Kadai Mutton", price: "₹449" },
-        { name: "Mutton Punjabi", price: "₹439" },
-        { name: "Mutton Afghani", price: "₹449" },
-        { name: "Mutton Rogan Josh", price: "₹439" },
-        { name: "Mutton Masala", price: "₹439" },
-        { name: "Mutton Malaysia", price: "₹449" },
-        { name: "Mutton Sanghwala", price: "₹449" },
-        { name: "Mutton Hyderabadi", price: "₹449" },
-        { name: "Mutton Maharaja", price: "₹449" },
-        { name: "Mutton Manpasand", price: "₹449" },
-        { name: "Mutton Kofta Curry", price: "₹459" },
-        { name: "Mutton Keema Curry", price: "₹459" },
-        { name: "Vedha's SPL Mutton Curry", price: "₹469" },
-      ],
-    },
-    {
-      sub: "Prawns",
-      items: [
-        { name: "Prawns Masala", price: "₹379" },
-        { name: "Telangana Prawns", price: "₹379" },
-        { name: "Prawns Kolhapuri", price: "₹389" },
-        { name: "Kadai Prawns", price: "₹389" },
-        { name: "Prawns Curry", price: "₹379" },
-        { name: "Buttered Prawns Masala", price: "₹389" },
-        { name: "Vedha's SPL Prawns Curry", price: "₹399" },
-      ],
-    },
-    {
-      sub: "Fish",
-      items: [
-        { name: "Fish Curry", price: "₹369" },
-        { name: "Telangana Fish Curry", price: "₹369" },
-        { name: "Fish Kolhapuri", price: "₹379" },
-        { name: "Kadai Fish", price: "₹379" },
-        { name: "Fish Masala", price: "₹369" },
-        { name: "Vedha's SPL Fish Curry", price: "₹389" },
-      ],
-    },
-    {
-      sub: "Egg",
-      items: [
-        { name: "Egg Bhurji", price: "₹189" },
-        { name: "Egg Masala", price: "₹219" },
-        { name: "Egg Curry", price: "₹219" },
-        { name: "Egg Maharaja", price: "₹229" },
-        { name: "Egg Chettinad", price: "₹229" },
-        { name: "Italian Egg Curry", price: "₹229" },
-      ],
-    },
-    {
-      sub: "Dal",
-      items: [
-        { name: "Dal Fry", price: "₹219" },
-        { name: "Tomato Tadka Dal", price: "₹219" },
-        { name: "Kashmiri Dal", price: "₹239" },
-        { name: "Punjabi Dal", price: "₹229" },
-        { name: "Palak Dal", price: "₹219" },
-        { name: "Kolhapuri Dal", price: "₹229" },
-        { name: "Vedha's Spl Dal Tadka", price: "₹249" },
-      ],
-    },
-  ],
-
-  tandoori: [
-    {
-      sub: "Tandoori",
-      items: [
-        { name: "Chicken Tikka (8 Pc)", price: "₹349" },
-        {
-          name: "Kalmi Kabab",
-          price: "₹359",
-          price2: "₹189",
-          priceLabel2: "2 Pc",
-        },
-        {
-          name: "Tangdi Kabab",
-          price: "₹359",
-          price2: "₹189",
-          priceLabel2: "2 Pc",
-        },
-        { name: "Banjara Kabab", price: "₹359" },
-        { name: "Chicken Malai Kabab", price: "₹359" },
-        { name: "Garlic Chicken Kabab", price: "₹359" },
-        {
-          name: "Tandoori Chicken",
-          price: "₹599",
-          price2: "₹299",
-          priceLabel2: "Half",
-        },
-        { name: "Fish Tikka (8 Pc)", price: "₹369" },
-        { name: "Paneer Tikka", price: "₹279" },
-      ],
-    },
-  ],
-
-  rice: [
-    {
-      sub: "Veg",
-      items: [
-        { name: "Veg Fried Rice", price: "₹229" },
-        { name: "Jeera Fried Rice", price: "₹239" },
-        { name: "Onion & Chilli Fried Rice", price: "₹239" },
-        { name: "Palak Fried Rice", price: "₹239" },
-        { name: "Mushroom Fried Rice", price: "₹239" },
-        { name: "Seven-O Fried Rice", price: "₹239" },
-        { name: "Paneer Fried Rice", price: "₹239" },
-        { name: "Baby Corn Fried Rice", price: "₹239" },
-        { name: "Lemon & Coconut Corn Fried Rice", price: "₹239" },
-        { name: "Tomato Fried Rice", price: "₹229" },
-        { name: "Biryani Rice Full", price: "₹179" },
-        { name: "Plain Rice", price: "₹69" },
-        { name: "Curd Rice", price: "₹139" },
-        { name: "Vedha's Spl Curd Rice", price: "₹159" },
-        { name: "Sambar Rice", price: "₹189" },
-        { name: "Dal Khichidi", price: "₹189" },
-      ],
-    },
-    {
-      sub: "Non Veg",
-      items: [
-        { name: "Chicken Fried Rice", price: "₹269" },
-        { name: "Mutton Fried Rice", price: "₹289" },
-        { name: "Egg Fried Rice", price: "₹239" },
-        { name: "Fish Fried Rice", price: "₹259" },
-        { name: "Prawns Fried Rice", price: "₹259" },
-        { name: "Vedha's Spl Mutton Fried Rice", price: "₹299" },
-        { name: "Vedha's Spl Chicken Fried Rice", price: "₹279" },
-        { name: "Schezwan Chicken Fried Rice", price: "₹269" },
-        { name: "Schezwan Mutton Fried Rice", price: "₹269" },
-        { name: "Schezwan Fish Fried Rice", price: "₹269" },
-        { name: "Schezwan Prawns Fried Rice", price: "₹269" },
-        { name: "Chicken Sambar Rice", price: "₹209" },
-        { name: "Vedha's Spl Mixed Fried Rice", price: "₹319" },
-      ],
-    },
-  ],
-
-  biryani: [
-    {
-      sub: "Veg Biryani",
-      items: [
-        {
-          name: "Veg Biryani",
-          price: "₹159",
-          price2: "₹249",
-          price3: "₹499",
-          priceLabel2: "Handi",
-          priceLabel3: "Family",
-        },
-        { name: "Kashmiri Veg Biryani Full", price: "₹259" },
-        { name: "Vedha's Spl Veg Biryani", price: "₹259" },
-        { name: "Paneer Kaju Biryani", price: "₹239", price2: "₹339", priceLabel2: "Handi" },
-        {
-          name: "Paneer Biryani",
-          price: "₹209",
-          price2: "₹299",
-          price3: "₹599",
-          priceLabel2: "Handi",
-          priceLabel3: "Family",
-        },
-        { name: "Kaju Biryani", price: "₹329" },
-        { name: "Mushroom Biryani", price: "₹299" },
-      ],
-    },
-    {
-      sub: "Non Veg Biryani",
-      items: [
-        {
-          name: "Chicken Dum Biryani",
-          price: "₹219",
-          price2: "₹319",
-          price3: "₹629",
-          priceLabel2: "Handi",
-          priceLabel3: "Family",
-        },
-        {
-          name: "Mutton Dum Biryani",
-          price: "₹269",
-          price2: "₹389",
-          price3: "₹739",
-          priceLabel2: "Handi",
-          priceLabel3: "Family",
-        },
-        { name: "Prawns Biryani", price: "₹269", price2: "₹389", priceLabel2: "Handi" },
-        { name: "Fish Biryani", price: "₹269", price2: "₹389", priceLabel2: "Handi" },
-        { name: "Egg Biryani", price: "₹249" },
-        { name: "Vedha's Spl Chicken Biryani", price: "₹349" },
-        { name: "Vedha's Spl Mutton Biryani", price: "₹419" },
-        { name: "Mutton Keema Biryani", price: "₹459" },
-        { name: "Mutton Mughlai Biryani", price: "₹449" },
-        { name: "Chicken Mughlai Biryani", price: "₹389" },
-        { name: "Joint Chicken Biryani", price: "₹339" },
-        { name: "Fried Piece Chicken Biryani", price: "₹219", price2: "₹319", priceLabel2: "Handi" },
-      ],
-    },
-    {
-      sub: "Pulao",
-      items: [
-        { name: "Kashmiri Kesar Pulao", price: "On Request" },
-        { name: "Green Peas Pulao", price: "On Request" },
-        { name: "Paneer Tikka Pulao", price: "On Request" },
-        { name: "Egg Pulao", price: "On Request" },
-        { name: "Chicken Pulao", price: "On Request" },
-        { name: "Prawn Pulao", price: "On Request" },
-        { name: "Fish Pulao", price: "On Request" },
-        { name: "Mixed Non-Veg Pulao", price: "On Request" },
-        { name: "Vegetable Pulao", price: "On Request" },
-      ],
-    },
-    {
-      sub: "Jumbo Specials",
-      items: [
-        { name: "Vedha's SPL Jumbo Mutton", price: "₹1,099" },
-        { name: "Vedha's SPL Jumbo Chicken", price: "₹999" },
-      ],
-    },
-  ],
-
-  breads: [
-    {
-      sub: "Roti / Naan / Indian Breads",
-      items: [
-        { name: "Roti", price: "₹30" },
-        { name: "Butter Roti", price: "₹35" },
-        { name: "Naan", price: "₹40" },
-        { name: "Butter Naan", price: "₹45" },
-        { name: "Garlic Naan", price: "₹55" },
-        { name: "Kulcha", price: "₹45" },
-        { name: "Garlic Kulcha", price: "₹60" },
-        { name: "Masala Kulcha", price: "₹60" },
-        { name: "Aloo Paratha", price: "₹55" },
-        { name: "Lacha Paratha", price: "₹50" },
-        { name: "Pudina Paratha", price: "₹50" },
-        { name: "Menthi Paratha", price: "₹50" },
-        { name: "Pulka", price: "₹30" },
-        { name: "Butter Pulka", price: "₹35" },
-        { name: "Roasted Papad", price: "₹30" },
-        { name: "Fry Papad", price: "₹35" },
-        { name: "Roasted Masala Papad", price: "₹45" },
-        { name: "Fry Masala Papad", price: "₹45" },
-      ],
-    },
-  ],
-
-  salads: [
-    {
-      sub: "Salads",
-      items: [
-        { name: "Onion Salad", price: "₹70" },
-        { name: "Tomato Salad", price: "₹90" },
-        { name: "Cucumber Salad", price: "₹90" },
-        { name: "Carrot & Beetroot Salad", price: "₹90" },
-        { name: "Green Salad", price: "₹90" },
-        { name: "Spl Veg Salad", price: "₹130" },
-      ],
-    },
-    {
-      sub: "Raita & Curd",
-      items: [
-        { name: "Curd", price: "₹40" },
-        { name: "Mix Raita", price: "₹60" },
-        { name: "Onion Raita", price: "₹50" },
-        { name: "Cucumber Raita", price: "₹50" },
-      ],
-    },
-  ],
-
-  desserts: [
-    {
-      sub: "Desserts",
-      items: [
-        { name: "Gulab Jamun + Ice Cream", price: "₹99" },
-        { name: "Gulab Jamun", price: "₹59" },
-        { name: "Double Ka Meetha", price: "₹59" },
-        { name: "Kaddu Ka Kheer", price: "₹59" },
-        { name: "Qurbani Ka Meetha", price: "₹99" },
-        { name: "Qurbani Ka Meetha + Ice Cream", price: "₹149" },
-      ],
-    },
-  ],
-
-  beverages: [
-    {
-      sub: "Beverages",
-      items: [
-        { name: "Fresh Lime Soda", price: "₹69" },
-        { name: "Butter Milk", price: "₹69" },
-        { name: "Lassi", price: "₹69" },
-        { name: "Milk Shake", price: "₹149" },
-        { name: "Mojito", price: "₹149" },
-        { name: "Ice Cream", price: "₹99" },
-        { name: "Fruit Salad", price: "₹149" },
-        { name: "Soft Drink", price: "₹40" },
-        { name: "Water Bottle", price: "₹25" },
-      ],
-    },
-  ],
-};
-
-// ─── Tab Config ───────────────────────────────────────────────────────────────
-const topCategories: { key: TopCategory; label: string;  }[] = [
-  { key: "soups", label: "Soups" },
-  { key: "starters", label: "Starters" },
-  { key: "noodles", label: "Noodles" },
-  { key: "curries", label: "Curries" },
-  { key: "tandoori", label: "Tandoori" },
-  { key: "rice", label: "Rice" },
-  { key: "biryani", label: "Biryani" },
-  { key: "breads", label: "Breads" },
-  { key: "salads", label: "Salads"},
-  { key: "desserts", label: "Desserts" },
-  { key: "beverages", label: "Beverages" },
-];
+import { EASE } from "@/components/motion";
+import { menuData, topCategories, totalDishes, type MenuItem, type TopCategory } from "@/data/menu";
+import dish3 from "@/assets/dish-3.webp";
 
 // ─── Price Display Helper ─────────────────────────────────────────────────────
 const PriceDisplay = ({ item }: { item: MenuItem }) => {
   if (item.price2 || item.price3) {
+    const rows = [
+      { label: item.price3 ? "Bachelor" : "", price: item.price },
+      item.price2 && { label: item.priceLabel2 ?? "", price: item.price2 },
+      item.price3 && { label: item.priceLabel3 ?? "", price: item.price3 },
+    ].filter(Boolean) as { label: string; price: string }[];
     return (
-      <div className="flex flex-col items-end gap-1 min-w-[120px]">
-        <div className="flex items-center gap-2">
-          <span className="font-body text-xs text-muted-foreground">
-            {item.price3 ? "Bachelor" : ""}
-          </span>
-          <span className="font-display text-base font-semibold text-primary">
-            {item.price}
-          </span>
-        </div>
-        {item.price2 && (
-          <div className="flex items-center gap-2">
-            <span className="font-body text-xs text-muted-foreground">
-              {item.priceLabel2 ?? ""}
-            </span>
-            <span className="font-display text-base font-semibold text-primary">
-              {item.price2}
-            </span>
+      <div className="flex min-w-[120px] flex-col items-end gap-1">
+        {rows.map((r) => (
+          <div key={r.label + r.price} className="flex items-center gap-2">
+            {r.label && (
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {r.label}
+              </span>
+            )}
+            <span className="font-display text-base font-semibold text-primary">{r.price}</span>
           </div>
-        )}
-        {item.price3 && (
-          <div className="flex items-center gap-2">
-            <span className="font-body text-xs text-muted-foreground">
-              {item.priceLabel3 ?? ""}
-            </span>
-            <span className="font-display text-base font-semibold text-primary">
-              {item.price3}
-            </span>
-          </div>
-        )}
+        ))}
       </div>
     );
   }
-  return (
-    <span className="font-display text-lg font-semibold text-primary whitespace-nowrap">
-      {item.price}
-    </span>
-  );
+  return <span className="whitespace-nowrap font-display text-base font-semibold text-primary sm:text-lg">{item.price}</span>;
 };
+
+const isSpecial = (name: string) => /vedha'?s/i.test(name);
+
+// forwardRef so AnimatePresence's "popLayout" mode can measure each card as it leaves.
+const ItemCard = forwardRef<HTMLDivElement, { item: MenuItem; index: number; context?: string }>(({ item, index, context }, ref) => (
+  <motion.div
+    ref={ref}
+    layout
+    initial={{ opacity: 0, y: 18, scale: 0.98 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.96 }}
+    transition={{ duration: 0.4, delay: Math.min(index * 0.03, 0.4), ease: EASE }}
+    className="group relative flex items-start justify-between gap-4 overflow-hidden rounded-2xl border border-border bg-card p-5 transition-[border-color,box-shadow] duration-300 hover:border-primary/30 hover:shadow-[0_16px_40px_-20px_hsl(var(--primary)/0.4)]"
+  >
+    <span className="absolute inset-y-0 left-0 w-1 origin-top scale-y-0 bg-primary transition-transform duration-300 group-hover:scale-y-100" />
+    <div className="flex-1">
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="font-display text-[0.95rem] font-semibold leading-snug sm:text-[1.05rem] text-foreground">{item.name}</h3>
+        {isSpecial(item.name) && (
+          <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent">
+            House special
+          </span>
+        )}
+      </div>
+      {item.desc && <p className="mt-0.5 text-sm text-muted-foreground">{item.desc}</p>}
+      {context && <p className="mt-1 text-xs font-medium text-muted-foreground">{context}</p>}
+    </div>
+    <PriceDisplay item={item} />
+  </motion.div>
+));
+ItemCard.displayName = "ItemCard";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const MenuPage = () => {
   const [activeTop, setActiveTop] = useState<TopCategory>("soups");
-  const [activeSub, setActiveSub] = useState<string>(
-    menuData["soups"][0].sub
-  );
+  const [activeSub, setActiveSub] = useState<string>(menuData["soups"][0].sub);
+  const [query, setQuery] = useState("");
 
   const handleTopChange = (key: TopCategory) => {
     setActiveTop(key);
@@ -693,84 +76,173 @@ const MenuPage = () => {
 
   const sections = menuData[activeTop];
   const hasSubs = sections.length > 1;
-  const visibleItems = hasSubs
-    ? sections.find((s) => s.sub === activeSub)?.items ?? []
-    : sections[0].items;
+  const visibleItems = hasSubs ? sections.find((s) => s.sub === activeSub)?.items ?? [] : sections[0].items;
+
+  const searchResults = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return null;
+    const results: { item: MenuItem; context: string }[] = [];
+    for (const cat of topCategories) {
+      for (const sec of menuData[cat.key]) {
+        for (const item of sec.items) {
+          if (item.name.toLowerCase().includes(q)) {
+            results.push({ item, context: sec.sub === cat.label ? cat.label : `${cat.label} · ${sec.sub}` });
+          }
+        }
+      }
+    }
+    return results;
+  }, [query]);
 
   return (
     <>
-      <PageHero title="Our Menu" subtitle="A Culinary Journey" />
+      <PageHero
+        title="Our Menu"
+        subtitle={`${Math.floor(totalDishes / 10) * 10}+ dishes across ${topCategories.length} categories — from slow-cooked biryanis to sizzling tandoor.`}
+        image={dish3}
+      />
 
-      <section className="section-padding bg-background">
-        <div className="max-w-4xl mx-auto">
-
-          {/* ── Top Category Tabs ── */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
-            {topCategories.map((cat) => (
+      <section className="bg-background px-4 pb-24 pt-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl">
+          {/* ── Search ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: EASE }}
+            className="relative mx-auto mb-8 max-w-xl"
+          >
+            <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search dishes — biryani, paneer, soup…"
+              aria-label="Search the menu"
+              className="h-12 w-full rounded-full border border-border bg-card pl-12 pr-12 text-sm sm:h-14 shadow-sm outline-none transition-all placeholder:text-muted-foreground/70 focus:border-primary/40 focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.12)]"
+            />
+            {query && (
               <button
-                key={cat.key}
-                onClick={() => handleTopChange(cat.key)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full font-body text-sm uppercase tracking-widest transition-all duration-300 ${
-                  activeTop === cat.key
-                    ? "gold-gradient text-secondary"
-                    : "border border-border text-muted-foreground hover:border-primary hover:text-primary"
-                }`}
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-4 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-white"
               >
-                {/* <span>{cat.icon}</span> */}
-                <span>{cat.label}</span>
+                <X size={14} />
               </button>
-            ))}
+            )}
+          </motion.div>
+
+          {/* ── Sticky category bar ── */}
+          <div className="sticky top-[96px] z-30 sm:top-[106px] -mx-4 mb-6 px-4 sm:mx-0 sm:px-0">
+            <LayoutGroup id="top-cats">
+              <div className="no-scrollbar flex gap-1 overflow-x-auto rounded-full border border-border bg-card/90 p-1.5 shadow-[0_10px_30px_-15px_rgba(30,15,10,0.25)] backdrop-blur-xl sm:flex-wrap sm:justify-center">
+                {topCategories.map((cat) => {
+                  const active = !searchResults && activeTop === cat.key;
+                  return (
+                    <button
+                      key={cat.key}
+                      onClick={() => {
+                        setQuery("");
+                        handleTopChange(cat.key);
+                      }}
+                      className={`relative shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold sm:px-4 sm:py-2 sm:text-sm transition-colors duration-300 ${
+                        active ? "text-white" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {active && (
+                        <motion.span
+                          layoutId="menu-pill"
+                          transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                          className="absolute inset-0 -z-0 rounded-full bg-primary shadow-[0_6px_16px_-6px_hsl(var(--primary)/0.8)]"
+                        />
+                      )}
+                      <span className="relative">{cat.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </LayoutGroup>
           </div>
 
           {/* ── Sub-Category Tabs (shown only when multiple subs) ── */}
-          {hasSubs && (
-            <div className="flex flex-wrap justify-center gap-2 mb-10">
-              {sections.map((sec) => (
-                <button
-                  key={sec.sub}
-                  onClick={() => setActiveSub(sec.sub)}
-                  className={`px-4 py-1.5 rounded font-body text-xs uppercase tracking-widest transition-all duration-300 ${
-                    activeSub === sec.sub
-                      ? "bg-primary/20 text-primary border border-primary"
-                      : "border border-border/50 text-muted-foreground hover:border-primary/50 hover:text-primary"
-                  }`}
-                >
-                  {sec.sub}
-                </button>
-              ))}
-            </div>
+          <AnimatePresence initial={false}>
+            {!searchResults && hasSubs && (
+              <motion.div
+                key={activeTop}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.35, ease: EASE }}
+                className="overflow-hidden"
+              >
+                <LayoutGroup id="sub-cats">
+                  <div className="mb-8 flex flex-wrap justify-center gap-2 pt-1">
+                    {sections.map((sec) => {
+                      const active = activeSub === sec.sub;
+                      return (
+                        <button
+                          key={sec.sub}
+                          onClick={() => setActiveSub(sec.sub)}
+                          className={`relative rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${
+                            active ? "border-transparent text-primary" : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary"
+                          }`}
+                        >
+                          {active && (
+                            <motion.span
+                              layoutId="sub-pill"
+                              transition={{ type: "spring", stiffness: 400, damping: 34 }}
+                              className="absolute inset-0 rounded-full border border-primary/40 bg-primary/10"
+                            />
+                          )}
+                          <span className="relative">{sec.sub}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </LayoutGroup>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ── Heading for current view ── */}
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <AnimatePresence mode="wait">
+              <motion.h2
+                key={searchResults ? `q-${query}` : `${activeTop}-${activeSub}`}
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 16 }}
+                transition={{ duration: 0.3 }}
+                className="font-display text-2xl font-semibold sm:text-3xl"
+              >
+                {searchResults
+                  ? `Results for “${query.trim()}”`
+                  : `${topCategories.find((c) => c.key === activeTop)?.label}${hasSubs ? ` · ${activeSub}` : ""}`}
+              </motion.h2>
+            </AnimatePresence>
+            <span className="shrink-0 text-sm text-muted-foreground">
+              {(searchResults ?? visibleItems).length} items
+            </span>
+          </div>
+
+          {/* ── Menu Items ── */}
+          <motion.div layout className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <AnimatePresence mode="popLayout">
+              {searchResults
+                ? searchResults.map(({ item, context }, i) => (
+                    <ItemCard key={`${context}-${item.name}`} item={item} index={i} context={context} />
+                  ))
+                : visibleItems.map((item, i) => <ItemCard key={`${activeTop}-${activeSub}-${item.name}`} item={item} index={i} />)}
+            </AnimatePresence>
+          </motion.div>
+
+          {searchResults && searchResults.length === 0 && (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-16 text-center text-muted-foreground">
+              No dishes match “{query.trim()}”. Try another word.
+            </motion.p>
           )}
 
-          {/* ── Menu Items List ── */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`${activeTop}-${activeSub}`}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.35 }}
-              className="space-y-0"
-            >
-              {visibleItems.map((item) => (
-                <div
-                  key={item.name}
-                  className="flex items-start justify-between py-5 border-b border-border/50 last:border-0"
-                >
-                  <div className="flex-1 pr-4">
-                    <h3 className="font-display text-base font-semibold text-foreground leading-snug">
-                      {item.name}
-                    </h3>
-                    {item.desc && (
-                      <p className="font-body text-muted-foreground text-sm mt-0.5">
-                        {item.desc}
-                      </p>
-                    )}
-                  </div>
-                  <PriceDisplay item={item} />
-                </div>
-              ))}
-            </motion.div>
-          </AnimatePresence>
+          <p className="mt-10 text-center text-xs text-muted-foreground">
+            All prices are in Indian Rupees (₹).
+          </p>
         </div>
       </section>
     </>

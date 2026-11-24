@@ -1,44 +1,58 @@
 import { motion } from "framer-motion";
+import { EASE, SplitText } from "@/components/motion";
+import { cn } from "@/lib/utils";
 
 interface SectionHeadingProps {
-  subtitle?: string;
   title: string;
+  /** Words in the title to render in italic brand colour, e.g. ["Signature"]. */
+  highlight?: string[];
   description?: string;
   light?: boolean;
+  align?: "center" | "left";
+  className?: string;
 }
 
-const SectionHeading = ({ subtitle, title, description, light }: SectionHeadingProps) => {
+const SectionHeading = ({
+  title,
+  highlight = [],
+  description,
+  light,
+  align = "center",
+  className,
+}: SectionHeadingProps) => {
+  const centered = align === "center";
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      className="text-center mb-12"
-    >
-      {subtitle && (
-        <span className="font-body text-sm uppercase tracking-[0.3em] text-primary mb-2 block">
-          {subtitle}
-        </span>
-      )}
+    <div className={cn("mb-10 sm:mb-14", centered ? "text-center" : "text-left", className)}>
       <h2
-        className={`font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 ${
-          light ? "text-primary-foreground" : "text-foreground"
-        }`}
+        className={cn(
+          "font-display text-[1.85rem] font-semibold leading-[1.1] sm:text-5xl sm:leading-[1.05] lg:text-6xl",
+          light ? "text-white" : "text-foreground",
+        )}
       >
-        {title}
+        <SplitText
+          text={title}
+          inView
+          wordClassName={(w) =>
+            highlight.includes(w.replace(/[^\w']/g, "")) ? "italic font-normal text-primary" : undefined
+          }
+        />
       </h2>
-      <div className="w-16 h-0.5 bg-primary mx-auto mb-4" />
       {description && (
-        <p
-          className={`max-w-2xl mx-auto font-body text-base leading-relaxed ${
-            light ? "text-primary-foreground/70" : "text-muted-foreground"
-          }`}
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.25, ease: EASE }}
+          className={cn(
+            "mt-4 max-w-2xl text-[0.95rem] leading-relaxed sm:mt-5 sm:text-lg",
+            centered && "mx-auto",
+            light ? "text-white/65" : "text-muted-foreground",
+          )}
         >
           {description}
-        </p>
+        </motion.p>
       )}
-    </motion.div>
+    </div>
   );
 };
 

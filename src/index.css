@@ -1,47 +1,50 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Lato:wght@300;400;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 40 20% 97%;
-    --foreground: 30 10% 12%;
+    /* Warm cream canvas */
+    --background: 36 45% 97%;
+    --foreground: 20 16% 10%;
 
-    --card: 40 25% 95%;
-    --card-foreground: 30 10% 12%;
+    --card: 36 40% 99%;
+    --card-foreground: 20 16% 10%;
 
-    --popover: 40 20% 97%;
-    --popover-foreground: 30 10% 12%;
+    --popover: 36 40% 99%;
+    --popover-foreground: 20 16% 10%;
 
-    --primary: 38 70% 50%;
-    --primary-foreground: 40 20% 97%;
+    /* Brand red — taken from the Hotel Vedha chef-hat logo */
+    --primary: 357 76% 48%;
+    --primary-foreground: 36 45% 98%;
 
-    --secondary: 30 30% 20%;
-    --secondary-foreground: 40 25% 92%;
+    /* Espresso — dark sections, header ink */
+    --secondary: 20 22% 8%;
+    --secondary-foreground: 36 35% 94%;
 
-    --muted: 35 15% 90%;
-    --muted-foreground: 30 8% 45%;
+    --muted: 34 30% 92%;
+    --muted-foreground: 22 9% 40%;
 
-    --accent: 38 60% 45%;
-    --accent-foreground: 40 20% 97%;
+    /* Saffron — highlights & warm accents */
+    --accent: 32 92% 52%;
+    --accent-foreground: 20 22% 8%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 35 20% 85%;
-    --input: 35 20% 85%;
-    --ring: 38 70% 50%;
+    --border: 30 22% 87%;
+    --input: 30 22% 87%;
+    --ring: 357 76% 48%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    --gold: 38 70% 50%;
-    --gold-light: 40 65% 65%;
-    --cream: 40 25% 95%;
-    --espresso: 25 40% 12%;
-    --mocha: 30 30% 20%;
-    --warm-gray: 30 8% 45%;
+    /* Legacy tokens kept for compatibility, re-tuned to the new palette */
+    --gold: 32 92% 52%;
+    --gold-light: 40 95% 64%;
+    --cream: 36 45% 96%;
+    --espresso: 20 22% 8%;
+    --mocha: 20 18% 14%;
+    --warm-gray: 22 9% 40%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -52,65 +55,136 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-
-  .dark {
-    --background: 25 40% 8%;
-    --foreground: 40 25% 92%;
-    --card: 25 35% 12%;
-    --card-foreground: 40 25% 92%;
-    --popover: 25 35% 12%;
-    --popover-foreground: 40 25% 92%;
-    --primary: 38 70% 50%;
-    --primary-foreground: 40 20% 97%;
-    --secondary: 30 20% 18%;
-    --secondary-foreground: 40 25% 92%;
-    --muted: 30 15% 18%;
-    --muted-foreground: 30 10% 55%;
-    --accent: 38 60% 45%;
-    --accent-foreground: 40 20% 97%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 30 15% 22%;
-    --input: 30 15% 22%;
-    --ring: 38 70% 50%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
 }
 
 @layer base {
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     @apply bg-background text-foreground font-body antialiased;
+    font-feature-settings: "ss01", "cv11";
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display;
+    @apply font-display tracking-tight;
+    font-optical-sizing: auto;
+  }
+  ::selection {
+    background: hsl(var(--primary) / 0.85);
+    color: hsl(var(--primary-foreground));
   }
 }
 
 @layer components {
   .section-padding {
-    @apply px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24;
+    @apply px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32;
   }
-  .gold-gradient {
-    background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-light)) 100%);
+
+  /* Small uppercase label above headings */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary;
   }
-  .text-gold-gradient {
-    background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-light)) 100%);
+  .eyebrow-dark {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80 backdrop-blur;
+  }
+
+  .btn-primary {
+    @apply relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-5 py-3 sm:px-6 sm:py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.8)];
+  }
+  .btn-ghost-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-3 sm:px-6 sm:py-3.5 text-sm font-semibold text-white backdrop-blur transition-all duration-300 hover:bg-white/15 hover:-translate-y-0.5;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-foreground/15 bg-transparent px-5 py-3 sm:px-6 sm:py-3.5 text-sm font-semibold text-foreground transition-all duration-300 hover:bg-foreground hover:text-background hover:-translate-y-0.5;
+  }
+
+  /* Text effects */
+  .text-gold-gradient,
+  .text-brand-gradient {
+    background: linear-gradient(120deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 55%, hsl(var(--accent)) 100%);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: shimmer-text 6s linear infinite;
   }
+  .gold-gradient {
+    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%);
+  }
+
   .overlay-dark {
     @apply absolute inset-0;
-    background: linear-gradient(180deg, hsla(var(--espresso) / 0.7) 0%, hsla(var(--espresso) / 0.5) 100%);
+    background:
+      radial-gradient(120% 80% at 50% 0%, hsl(var(--espresso) / 0.35) 0%, hsl(var(--espresso) / 0.85) 100%),
+      linear-gradient(180deg, hsl(var(--espresso) / 0.55) 0%, hsl(var(--espresso) / 0.75) 100%);
+  }
+
+  /* Subtle film grain for dark sections */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.07;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* Dotted grid backdrop */
+  .bg-dots {
+    background-image: radial-gradient(hsl(var(--foreground) / 0.09) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .bg-dots-dark {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@keyframes shimmer-text {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Orbit: ring spins, each photo counter-spins so it stays upright */
+.orbit-ring {
+  animation: orbit-spin 48s linear infinite;
+}
+.orbit-counter {
+  animation: orbit-spin 48s linear infinite reverse;
+}
+.orbit-paused .orbit-ring,
+.orbit-paused .orbit-counter {
+  animation-play-state: paused;
+}
+@keyframes orbit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .orbit-ring,
+  .orbit-counter,
+  .text-gold-gradient,
+  .text-brand-gradient,
+  .animate-marquee,
+  .animate-marquee-reverse {
+    animation: none !important;
   }
 }
