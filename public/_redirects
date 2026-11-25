@@ -1,0 +1,5 @@
+# Netlify: this is a single-page app — every route (/menu, /about, …) is handled by
+# React Router inside index.html. Without this rule, refreshing or opening a deep link
+# like https://hotelvedha.com/menu returns Netlify's "Page not found" (404).
+# Real files (assets, images, robots.txt, sitemap.xml) are still served first.
+/*    /index.html   200
